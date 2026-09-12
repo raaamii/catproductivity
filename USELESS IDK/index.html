@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cat Productivity — Serious tools. Terrible management.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app" id="appShell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand-row">
+      <span class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="30" height="30"><path d="M7 13 L5 4 L13 9 Z" fill="none" stroke="#20211E" stroke-width="2" stroke-linejoin="round"/><path d="M25 13 L27 4 L19 9 Z" fill="none" stroke="#20211E" stroke-width="2" stroke-linejoin="round"/><ellipse cx="16" cy="19" rx="10" ry="8.5" fill="none" stroke="#20211E" stroke-width="2"/><circle cx="12.5" cy="18" r="1.4" fill="#20211E"/><circle cx="19.5" cy="18" r="1.4" fill="#20211E"/><path d="M14.5 22 Q16 23.5 17.5 22" fill="none" stroke="#20211E" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </span>
+      <span class="brand-text">Cat Productivity<small>Serious tools. Terrible management.</small></span>
+    </div>
+
+    <nav class="nav" aria-label="Primary">
+      <button class="nav-btn active" data-view="overview" onclick="nav('overview')"><span class="ico">◈</span>Overview</button>
+      <button class="nav-btn" data-view="workspace" onclick="nav('workspace')"><span class="ico">▤</span>Workspace</button>
+      <button class="nav-btn" data-view="reminders" onclick="nav('reminders')"><span class="ico">＋</span>Schedule</button>
+      <button class="nav-btn" data-view="sessions" onclick="nav('sessions')"><span class="ico">☰</span>Sessions</button>
+      <button class="nav-btn" data-view="cat" onclick="nav('cat')"><span class="ico">●</span>Milo<span class="nav-rank" id="navRank"></span></button>
+      <button class="nav-btn" data-view="settingsEl" onclick="nav('settingsEl')"><span class="ico">⚙</span>Settings</button>
+    </nav>
+
+    <!-- subtle Milo sidebar peek -->
+    <div class="sidebar-peek" id="sidebarPeek" aria-hidden="true">
+      <div class="peek-ears"><span></span><span></span></div>
+      <div class="peek-eyes"><i></i><i></i></div>
+    </div>
+    <div class="sidebar-tail" id="sidebarTail" aria-hidden="true"></div>
+
+    <div class="side-foot">
+      <div class="avatar" id="profileInit">M</div>
+      <div class="side-user"><b id="profileName">Milo</b><span class="muted" id="profileSub">Pro plan · Supervised</span></div>
+      <button class="icon-btn" onclick="nav('settingsEl')" title="Settings">⚙</button>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="page">
+
+    <!-- OVERVIEW -->
+    <section id="view-overview">
+      <div class="top-row">
+        <div>
+          <div class="eyebrow" id="ovDay">Dashboard</div>
+          <h1 id="ovGreet">Good evening, Zozo.</h1>
+          <p class="lead">Here's what you were planning to accomplish.</p>
+        </div>
+        <button class="btn" onclick="nav('reminders')">+ New Session</button>
+      </div>
+
+      <div class="upnext-wrap">
+        <div class="card upnext" id="ovNext"></div>
+        <div class="milo-sit" id="quietMilo" title="Resident supervisor"></div>
+      </div>
+
+      <div class="grid g2" style="margin-top:20px">
+        <div class="card">
+          <div class="eyebrow">Today</div>
+          <h3 style="margin:4px 0 10px">Schedule</h3>
+          <div id="ovUp" class="timeline"></div>
+        </div>
+        <div>
+          <div class="card"><div class="eyebrow">Today</div><div id="ovStats"></div></div>
+          <div class="card status-card">
+            <div class="eyebrow">System status</div>
+            <div class="status-line"><span class="dot ok"></span>Productivity tools · <b>Operational</b></div>
+            <div class="status-line"><span class="dot watch"></span>Milo · <b id="miloStatusWord">Suspicious</b></div>
+            <p class="muted" style="margin-top:8px;font-size:.83rem" id="miloStatusSub">Watching.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORKSPACE -->
+    <section id="view-workspace" class="hidden">
+      <div class="ws-topbar">
+        <button class="btn small ghost" onclick="nav('overview')">← Exit</button>
+        <div class="ws-title"><b id="wsTask">Data Structures</b><span class="muted" id="wsDesc"></span></div>
+        <div class="ws-mode pill" id="wsMode" onclick="toggleWsMode()" title="Click to toggle between Focus Mode & Cat Mode">Focus Mode</div>
+        <div class="timer" id="wsTimer">30:00</div>
+        <button class="btn small ghost" id="distractBtn" onclick="triggerDistractionManually()" title="Trigger a cat distraction immediately">🐾 Distract Me</button>
+        <button class="btn small ghost" id="pauseBtn" onclick="togglePause()">Pause</button>
+        <button class="btn small danger" onclick="finishSession()">End</button>
+      </div>
+      <div id="takeoverBar" class="takeover hidden"></div>
+      <div id="wsNotice"></div>
+      <article class="doc" id="docBody"></article>
+      <div class="card notes-card">
+        <label>Session notes</label>
+        <textarea id="wsNotes" placeholder="Write notes here. Milo only supervises — he never deletes. Probably."></textarea>
+      </div>
+    </section>
+
+    <!-- SCHEDULE -->
+    <section id="view-reminders" class="hidden">
+      <div class="form-narrow">
+        <div class="eyebrow">New session</div>
+        <h1>Schedule your work</h1>
+        <p class="lead">Tell us what you're pretending you'll finish.</p>
+        <div class="card form-card">
+          <label>Task name</label>
+          <input id="cTask" value="Study Data Structures" />
+          <label>Description</label>
+          <input id="cDesc" value="Linked Lists — Chapter 4" />
+          <div class="grid g4">
+            <div><label>Date</label><input id="cDate" type="date" /></div>
+            <div><label>Start time</label><input id="cTime" type="time" value="19:00" /></div>
+            <div><label>Duration</label>
+              <select id="cDur"><option value="5">5 min</option><option value="10">10 min</option><option value="25">25 min</option><option value="30" selected>30 min</option><option value="60">60 min</option></select>
+            </div>
+            <div><label>Session Mode</label>
+              <select id="cMode"><option value="cat" selected>Cat Mode 🐾</option><option value="focus">Focus Mode</option></select>
+            </div>
+          </div>
+          <label>Material</label>
+          <div class="row seg">
+            <button class="btn small ghost seg-btn" onclick="matTab('upload')">Upload document</button>
+            <button class="btn small ghost seg-btn" onclick="matTab('paste')">Paste text</button>
+            <button class="btn small ghost seg-btn" onclick="matTab('write')">Create notes</button>
+          </div>
+          <div id="mat-upload" class="subcard">
+            <p class="muted">Upload a PDF (select page ranges), an image, or a text document.</p>
+            <input id="cFile" type="file" accept=".pdf,.txt,.md,.text,.png,.jpg,.jpeg,.gif,.webp,.svg,image/*" />
+            <p class="muted" id="fileInfo"></p>
+            <div id="imgPicker" class="hidden" style="margin-top:10px">
+              <label>Uploaded Image</label>
+              <div id="imgPreview" style="margin:8px 0"></div>
+              <button class="btn small ghost" onclick="clearImgPicker()">Remove Image</button>
+            </div>
+            <div id="pdfPicker" class="hidden">
+              <label>Uploaded file</label>
+              <p class="pdf-name" id="pdfFileName">notes.pdf</p>
+              <p class="muted" id="pdfTotalPages"></p>
+              <label>Select pages</label>
+              <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+                <div><label>Start page</label><input id="pdfStart" type="number" min="1" value="10" /></div>
+                <div><label>End page</label><input id="pdfEnd" type="number" min="1" value="15" /></div>
+              </div>
+              <label style="margin-top:10px">Or enter pages / ranges <span class="muted" style="text-transform:none">e.g. 5 · 5-10 · 2, 5, 8 · 2-5, 10-15</span></label>
+              <input id="pdfRange" placeholder="e.g. 10-15" />
+              <p class="muted" id="pdfPickMsg"></p>
+              <div class="row" style="margin-top:8px">
+                <button class="btn small" onclick="openSelectedPages()">Open Selected Pages</button>
+                <button class="btn small ghost" onclick="clearPdfPicker()">Remove PDF</button>
+              </div>
+              <div id="pdfPreview"></div>
+            </div>
+          </div>
+          <div id="mat-paste" class="subcard hidden">
+            <textarea id="cPaste">Linked Lists
+
+A linked list is a linear data structure where elements are stored in nodes. Each node contains data and a reference to the next node.
+
+Types:
+- Singly linked list
+- Doubly linked list
+- Circular linked list
+
+Operations: traversal O(n), insertion O(1) at head, deletion O(1) with pointer.</textarea>
+          </div>
+          <div id="mat-write" class="subcard hidden">
+            <textarea id="cWrite" placeholder="Write study notes here..."></textarea>
+          </div>
+          <div class="row form-actions">
+            <button class="btn ghost" onclick="nav('overview')">Cancel</button>
+            <button class="btn" onclick="saveSession()">Schedule Session</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SESSIONS -->
+    <section id="view-sessions" class="hidden">
+      <div class="eyebrow">History</div>
+      <h1>Sessions</h1>
+      <p class="lead">A complete record of attempted productivity.</p>
+      <div class="card"><h3>Scheduled</h3><div id="sessList"></div></div>
+      <div class="card"><h3>History</h3><div id="histList"></div></div>
+    </section>
+
+    <!-- MILO -->
+    <section id="view-cat" class="hidden">
+      <div class="eyebrow">Management</div>
+      <h1>Milo</h1>
+      <p class="lead">Supervisor settings. All decisions are final.</p>
+      <div class="card milo-card">
+        <div id="catBig"></div>
+        <div class="rank-line"><span class="pill" id="rankPill">Distraction Intern</span></div>
+        <p class="muted" id="rankSub"></p>
+        <div class="meter-label">Career progression</div>
+        <div class="progress"><i id="rankBar"></i></div>
+        <label>Cat name</label>
+        <input id="catName" value="Milo" style="max-width:320px;margin:0 auto" />
+        <label>Accessory <span class="muted" style="text-transform:none">(unlocked by rank)</span></label>
+        <div class="row" style="justify-content:center" id="accRow">
+          <button class="btn small ghost" data-acc="">None</button>
+          <button class="btn small ghost" data-acc="🎩">Hat</button>
+          <button class="btn small ghost" data-acc="👓">Glasses</button>
+          <button class="btn small ghost" data-acc="🎀">Bow</button>
+          <button class="btn small ghost" data-acc="👑">Crown</button>
+        </div>
+        <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" onclick="saveCat()">Save</button></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settingsEl" class="hidden">
+      <div class="eyebrow">Settings</div>
+      <h1>Settings</h1>
+      <p class="lead">Adjust the pacing. Interruptions are non-negotiable.</p>
+      <div class="card form-card">
+        <label>Session pacing <span class="muted" style="text-transform:none">(gap range only — never disables interruptions)</span></label>
+        <select id="setIntensity"><option value="calm">Calm</option><option value="normal" selected>Normal</option><option value="intense">Intense</option></select>
+        <label style="margin-top:12px">Default Session Mode</label>
+        <select id="setDefaultMode">
+          <option value="cat" selected>Cat Mode 🐾 (Supervised by Milo)</option>
+          <option value="focus">Focus Mode</option>
+        </select>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" onclick="saveSettings()">Save</button>
+          <button class="btn ghost" onclick="if(confirm('Clear all data?')){localStorage.clear();location.reload();}">Reset workspace</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- REPORT -->
+    <section id="view-report" class="hidden">
+      <div class="eyebrow">Analytics</div>
+      <h1 id="repTask">Data Structures</h1>
+      <p class="lead" id="repMeta"></p>
+      <div class="grid g3" id="repGrid"></div>
+      <div class="grid g2" style="margin-top:16px">
+        <div class="card report-card">
+          <div class="eyebrow">Productivity health</div>
+          <div class="report-big critical">Critical</div>
+          <p class="muted">Target not achieved. Cause under investigation.</p>
+        </div>
+        <div class="card report-card">
+          <div class="eyebrow">Milo performance</div>
+          <div class="report-big good">Exceptional</div>
+          <div id="repCat"></div>
+          <p class="muted">Employee of the Session · <b id="repRank">Chief Distraction Officer</b></p>
+          <div class="row" style="justify-content:center;margin-top:10px"><button class="btn" onclick="nav('reminders')">Schedule Another Session</button></div>
+        </div>
+      </div>
+    </section>
+
+    <footer>Cat Productivity · Serious tools. Terrible management.</footer>
+    </div>
+  </main>
+</div>
+
+<!-- History Modal Viewer -->
+<div id="histModal" class="hidden" style="position:fixed;inset:0;background:rgba(32,33,30,.45);backdrop-filter:blur(4px);z-index:1500;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div class="card" style="max-width:760px;width:100%;max-height:85vh;overflow-y:auto;position:relative;">
+    <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+      <div>
+        <div class="eyebrow">Session History</div>
+        <h2 id="histTaskTitle" style="margin:4px 0">Session Title</h2>
+        <p class="muted" id="histTaskMeta"></p>
+      </div>
+      <button class="btn small ghost" onclick="closeHistoryModal()">✕ Close</button>
+    </div>
+    <div id="histStatsGrid" class="grid g3" style="margin-bottom:16px"></div>
+    <div class="card" style="background:var(--soft);margin-bottom:16px">
+      <div class="eyebrow">Study Material</div>
+      <div id="histMaterialBody" style="margin-top:8px;max-height:340px;overflow-y:auto"></div>
+    </div>
+    <div id="histNotesWrap" class="card" style="background:var(--soft)">
+      <div class="eyebrow">Session Notes</div>
+      <p id="histNotesText" style="white-space:pre-wrap;margin-top:8px;font-size:.92rem;color:var(--ink)"></p>
+    </div>
+  </div>
+</div>
+
+<div id="miloTransition" class="milo-transition" aria-hidden="true">
+  <div class="grab-paws">🐾 🐾</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
